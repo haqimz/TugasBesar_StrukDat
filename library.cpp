@@ -1,4 +1,5 @@
 #include "library.h"
+#include "playlist.h"
 
 void initLibrary(Library &lib) {
     lib.firstArtis = nullptr;
@@ -13,7 +14,7 @@ adrLagu createLagu(int id, string judul, string genre, int durasi, int tahun) {
     pLagu->durasi = durasi;
     pLagu->tahun = tahun;
     pLagu->nextLagu = NULL;
-    pLagu->artis = NULL; 
+    pLagu->artis = NULL;
     return pLagu;
 };
 
@@ -40,7 +41,7 @@ adrArtis findArtis(Library lib, string namaArtis) {
 
 void insertArtis(Library &lib, adrArtis pArtis) {
     pArtis->nextArtis = lib.firstArtis;
-    lib.firstArtis = pArtis;    
+    lib.firstArtis = pArtis;
 };
 
 void insertLagu(Library &lib, adrLagu pLagu, string namaArtis) {
@@ -48,7 +49,7 @@ void insertLagu(Library &lib, adrLagu pLagu, string namaArtis) {
 
     if (pArtis == nullptr) {
         pArtis = createArtis(namaArtis);
-        insertArtis(lib, pArtis)
+        insertArtis(lib, pArtis);
     }
 
     pLagu->artis = pArtis;
@@ -77,13 +78,13 @@ void viewAllSongs(Library lib){
             cout << "ID\t| Judul\t\t| Genre\t| Tahun" << endl;
             cout << "---------------------------------------" << endl;
             while (pLagu != NULL) {
-                cout << pLagu->idLagu << "\t| " << pLagu->judul 
+                cout << pLagu->idLagu << "\t| " << pLagu->judul
                      << "\t\t| " << pLagu->genre << "\t| " << pLagu->tahun << endl;
                 pLagu = pLagu->nextLagu;
             }
         }
         pArtis = pArtis->nextArtis;
-    } 
+    }
 };
 
 adrLagu searchSongById(Library lib, int idLagu){
@@ -91,7 +92,7 @@ adrLagu searchSongById(Library lib, int idLagu){
     while (pArtis != NULL) {
         adrLagu pLagu = pArtis->firstLagu;
         while (pLagu != NULL) {
-            if (pLagu->idLagu == idLagu) return pLagu; 
+            if (pLagu->idLagu == idLagu) return pLagu;
             pLagu = pLagu->nextLagu;
         }
         pArtis = pArtis->nextArtis;
@@ -100,29 +101,26 @@ adrLagu searchSongById(Library lib, int idLagu){
 };
 
 adrLagu searchSongByJudul(Library lib, string judul) {
-    rArtis pArtis = lib.firstArtis;
-
-    while (pArtis != NULL) {
+    adrArtis pArtis = lib.firstArtis;
+    while (pArtis != nullptr) {
         adrLagu pLagu = pArtis->firstLagu;
-        while (pLagu != NULL) {
-            
+        while (pLagu != nullptr) {
             if (pLagu->judul == judul) {
-                return pLagu;
+                return pLagu; // Lagu ditemukan
             }
-            
             pLagu = pLagu->nextLagu;
         }
         pArtis = pArtis->nextArtis;
     }
-    return NULL;
-};
+    return nullptr; // ga ketemu di library
+}
 
 adrLagu searchSongByGenre(Library lib, string genre) {
     adrArtis pArtis = lib.firstArtis;
     while (pArtis != NULL) {
         adrLagu pLagu = pArtis->firstLagu;
         while (pLagu != NULL) {
-            if (pLagu->genre == genre) return pLagu; 
+            if (pLagu->genre == genre) return pLagu;
             pLagu = pLagu->nextLagu;
         }
         pArtis = pArtis->nextArtis;
@@ -145,12 +143,12 @@ bool deleteLagu(Library &lib, int idLagu, Sistem &sys) {
     adrArtis pArtis = lib.firstArtis;
 
     while (pArtis != NULL) {
-        
+
         adrLagu pLagu = pArtis->firstLagu;
-        adrLagu prevLagu = NULL; 
-        
+        adrLagu prevLagu = NULL;
+
         while (pLagu != NULL) {
-            
+
             if (pLagu->idLagu == idLagu) {
                 adrLagu deletedSong = pLagu;
 
@@ -160,7 +158,9 @@ bool deleteLagu(Library &lib, int idLagu, Sistem &sys) {
                     prevLagu->nextLagu = pLagu->nextLagu;
                 }
 
-                delete deletedSong; 
+                deleteSongReferenceFromAllPlaylists(sys, deletedSong);
+
+                delete deletedSong;
 
                 lib.totalSongs--;
                 cout << "Lagu ID " << idLagu << " berhasil dihapus dari Library dan semua Playlist." << endl;
@@ -189,14 +189,14 @@ bool deleteArtist(Library &lib, string namaArtis, Sistem &sys) {
 
     while (currentArtis != NULL) {
         if (currentArtis->nama == namaArtis) {
-            
+
             cout << "\n[HAPUS] Menghapus artis '" << namaArtis << "' dan semua lagunya..." << endl;
 
             adrLagu pLagu = currentArtis->firstLagu;
             while (pLagu != NULL) {
                 adrLagu tempLagu = pLagu;
-                pLagu = pLagu->nextLagu; 
-                delete tempLagu; 
+                pLagu = pLagu->nextLagu;
+                delete tempLagu;
                 lib.totalSongs--;
             }
 
@@ -207,7 +207,7 @@ bool deleteArtist(Library &lib, string namaArtis, Sistem &sys) {
             }
 
             delete currentArtis;
-            
+
             cout << "✅ Artis '" << namaArtis << "' berhasil dihapus dari Library." << endl;
             return true;
         }
@@ -221,8 +221,35 @@ bool deleteArtist(Library &lib, string namaArtis, Sistem &sys) {
 }
 
 void updateLagu(Library &lib, int idLagu) {
+    adrLagu target = searchSongById(lib, idLagu);
+    if (target == NULL) {
+        cout << "Lagu tidak ditemukan!" << endl;
+        return;
+    }
+    cout << "--- Update Data Lagu ID: " << idLagu << " ---" << endl;
+    cout << "Masukkan Judul baru: "; cin >> target->judul;
+    cout << "Masukkan Genre baru: "; cin >> target->genre;
+    cout << "Masukkan Tahun baru: "; cin >> target->tahun;
+    cout << "Data berhasil diperbarui!" << endl;
 }
 
 // --------------------
 
-adrLagu findSimilarSong(Library lib, adrLagu currentSong);
+adrLagu findSimilarSong(Library lib, adrLagu currentSong) {
+    if (lib.firstArtis == NULL || currentSong == NULL) return NULL;
+
+    string targetGenre = currentSong->genre;
+    adrArtis pArtis = lib.firstArtis;
+
+    while (pArtis != NULL) {
+        adrLagu pLagu = pArtis->firstLagu;
+        while (pLagu != NULL) {
+            if (pLagu->genre == targetGenre && pLagu != currentSong) {
+                return pLagu;
+            }
+            pLagu = pLagu->nextLagu;
+        }
+        pArtis = pArtis->nextArtis;
+    }
+    return NULL;
+}
