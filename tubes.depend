@@ -1,0 +1,43 @@
+# depslib dependency file v1.0
+1766156112 source:c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\main.cpp
+	<iostream>
+	<string>
+	"library.h"
+	"playlist.h"
+	"user.h"
+	"player.h"
+
+1766155204 c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\library.h
+	"types.h"
+
+1766155705 c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\types.h
+	<iostream>
+
+1766155301 c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\playlist.h
+	"types.h"
+
+1766157786 c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\user.h
+	"types.h"
+	"library.h"
+	"playlist.h"
+	"player.h"
+
+1766156141 c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\player.h
+	"types.h"
+
+1766157685 source:c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\library.cpp
+	"library.h"
+	"playlist.h"
+
+1766157458 source:c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\playlist.cpp
+	"playlist.h"
+
+1766157799 source:c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\user.cpp
+	"user.h"
+
+1766156347 source:c:\users\lenovo\documents\coolyeah\semester 3\struktur data\finaltubes\tubes\player.cpp
+	"player.h"
+	"library.h"
+	"user.h"
+	<iostream>
+

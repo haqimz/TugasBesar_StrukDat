@@ -1,7 +1,7 @@
 #include "user.h"
 
 void initSistem (Sistem &sys){
-    sys->firstUser = nullptr;
+    sys.firstUser = nullptr;
 };
 
 adrUser createNewUser(string uname, string pass){
@@ -42,17 +42,17 @@ adrUser findUser(Sistem sys, string uname){
     return nullptr;
 };
 
-void menuLogin(Sistem &sys, Library lib, Player &player) {
+void menuLogin(Sistem &sys, Library &lib, Player &player) {
     string username, pass;\
     cout << "===== Music Player Login =====" << endl;
     cout << "Username: ";
-    cin >> uname;
+    cin >> username;
     cout << "Password: ";
     cin >> pass;
 
-    if (uname == "admin" && pass == "admin") {
+    if (username == "admin" && pass == "admin") {
         cout << "Login berhasil! Selamat datang Admin." << endl;
-        menuAdmin();
+        menuAdmin(lib, sys);
         return;
     }
 
@@ -61,43 +61,58 @@ void menuLogin(Sistem &sys, Library lib, Player &player) {
     if (loggedInUserNode != nullptr) {
         if (loggedInUserNode->userData.password == pass) {
             cout << "Login berhasil! Selamat datang " << loggedInUserNode->userData.username << "." << endl;
-            menuUser();
+            menuUser(loggedInUserNode, lib, player);
         }
         else {
             cout << "Password salah." << endl;
-        } 
+        }
     } else {
         cout << "Username tidak ditemukan." << endl;
     }
 }
 
-void menuAdmin(Library &lib) {
+void menuAdmin(Library &lib, Sistem &sys) {
     int choice;
     do {
         cout << "\n===== ADMIN MENU =====" << endl;
-        cout << "1. Tambah Lagu Baru" << endl;       
-        cout << "2. Lihat Semua Lagu (Library)" << endl; 
-        cout << "3. Ubah Data Lagu" << endl;         
-        cout << "4. Hapus Data Lagu" << endl;        
+        cout << "1. Tambah Lagu Baru" << endl;
+        cout << "2. Lihat Semua Lagu (Library)" << endl;
+        cout << "3. Ubah Data Lagu" << endl;
+        cout << "4. Hapus Data Lagu" << endl;
         cout << "0. Logout" << endl;
         cout << "Pilihan: ";
         cin >> choice;
-        
+
         switch (choice) {
             case 1: {
+                int id, durasi, tahun;
+                string judul, genre, namaArtis;
+                cout << "Nama Artis: "; cin >> namaArtis;
+                cout << "ID Lagu: "; cin >> id;
+                cout << "Judul: "; cin >> judul;
+                cout << "Genre: "; cin >> genre;
+                cout << "Durasi: "; cin >> durasi;
+                cout << "Tahun: "; cin >> tahun;
 
+                adrLagu newLagu = createLagu(id, judul, genre, durasi, tahun);
+                insertLagu(lib, newLagu, namaArtis);
                 break;
             }
             case 2: {
-
+                viewAllSongs(lib);
                 break;
             }
             case 3: {
-
+                int id;
+                cout << "Masukkan ID lagu yang ingin diubah: "; cin >> id;
+                updateLagu(lib, id);
                 break;
             }
             case 4: {
-
+                int id;
+                cout << "Masukkan ID lagu yang ingin dihapus: "; cin >> id;
+                // Memanggil deleteLagu yang sudah menyertakan pembersihan Playlist
+                deleteLagu(lib, id, sys);
                 break;
             }
             case 0: {
@@ -105,44 +120,95 @@ void menuAdmin(Library &lib) {
                 break;
             }
             default: {
-                cout << "Pilihan tidak valid."
+                cout << "Pilihan tidak valid." << endl;
+                break;
             }
-        } while (choice != 0);
-    }
-};
+        } // Tutup Switch di sini
+    } while (choice != 0); // Tutup Do-While di sini
+}
 
 void menuUser(adrUser currentUserNode, Library &lib, Player &player) {
     int choice;
-    
-    adrPlaylistHead userPlaylists = currentUserNode->userData.firstPlaylist;
+    string namaPl, judul, nama; // Deklarasi di luar agar aman
 
     do {
         cout << "\n===== USER MENU - Welcome, " << currentUserNode->userData.username << " =====" << endl;
-        cout << "1. Cari Lagu" << endl;                       
-        cout << "2. Kontrol Pemutaran (Play/Stop/Next/Prev)" << endl;  28]
-        cout << "3. Kelola Playlist" << endl;                 
+        cout << "1. Cari Lagu & Tambah ke Playlist" << endl;
+        cout << "2. Kontrol Pemutaran (Play/Next/Prev)" << endl;
+        cout << "3. Kelola Playlist (Buat/Lihat/Hapus Lagu)" << endl;
         cout << "0. Logout" << endl;
         cout << "Pilihan: ";
-        cin >> choice;
+
+        // Validasi input angka agar tidak loop tak terhingga jika user input huruf
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
 
         switch (choice) {
             case 1: {
+                cout << "Masukkan Judul Lagu: ";
+                cin >> ws; getline(cin, judul);
+                adrLagu s = searchSongByJudul(lib, judul);
+                if (s != nullptr) {
+                    cout << "Lagu ditemukan: " << s->judul << " - " << s->artis->nama << endl;
+                    cout << "Tambah ke playlist? (y/n): ";
+                    char k; cin >> k;
+                    if (k == 'y') {
+                        cout << "Nama Playlist Tujuan: ";
+                        cin >> ws; getline(cin, namaPl);
+                        adrPlaylistHead ph = findPlaylist(currentUserNode->userData.firstPlaylist, namaPl);
+                        if (ph != nullptr) {
+                            addSongToPlaylist(ph->playlistData, s);
+                        } else {
+                            cout << "Playlist tidak ditemukan." << endl;
+                        }
+                    }
+                } else {
+                    cout << "Lagu tidak ditemukan." << endl;
+                }
                 break;
             }
             case 2: {
+                cout << "1. Play dari Playlist\n2. Next\n3. Prev\nPilih: ";
+                int sub; cin >> sub;
+                if (sub == 1) {
+                    cout << "Nama Playlist: ";
+                    cin >> ws; getline(cin, namaPl);
+                    adrPlaylistHead ph = findPlaylist(currentUserNode->userData.firstPlaylist, namaPl);
+                    if (ph != nullptr && ph->playlistData.firstSong != nullptr) {
+                        player.currentPlaylist = &ph->playlistData;
+                        player.currentPlaylistNode = ph->playlistData.firstSong;
+                        // PASTIKAN namanya songPointer sesuai struct kamu
+                        playSong(player, player.currentPlaylistNode->lagu);
+                    } else {
+                        cout << "Playlist kosong atau tidak ditemukan." << endl;
+                    }
+                } else if (sub == 2) {
+                    nextSong(player, lib);
+                } else if (sub == 3) {
+                    prevSong(player, lib);
+                }
                 break;
             }
             case 3: {
+                cout << "1. Buat Playlist Baru\n2. Lihat Semua Playlist\nPilih: ";
+                int sub; cin >> sub;
+                if (sub == 1) {
+                    cout << "Masukkan Nama Playlist: ";
+                    cin >> ws; // Pembersihan buffer
+                    getline(cin, nama);
+                    // Langsung kirim pointer asli dari currentUserNode
+                    insertNewPlaylist(currentUserNode->userData.firstPlaylist, nama);
+                } else if (sub == 2) {
+                    viewAllUserPlaylists(currentUserNode->userData.firstPlaylist);
+                }
                 break;
             }
-            case 0: {
-                cout << "Logging out User." << endl;
+            case 0:
+                cout << "Logging out User..." << endl;
                 break;
-            }
-            default: {
-                cout << "Pilihan tidak valid." << endl;
-            }
         }
-    }
-};
-
+    } while (choice != 0);
+}

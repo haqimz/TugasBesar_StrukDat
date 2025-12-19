@@ -48,12 +48,14 @@ struct PlaylistNode {
 
 struct Playlist {
     string namaPlaylist;
-    adrPlaylistNode firstSong;
+    adrPlaylistNode firstSong;\
+    int count;
 };
 
 struct PlaylistHeadNode {
     Playlist playlistData;
     adrPlaylistHead nextPlaylist;
+    string nama;
 };
 
 struct Library {

@@ -2,27 +2,37 @@
 
 void initPlaylist(Playlist &pl) {
     pl.firstSong = NULL;
+    pl.namaPlaylist = nullptr;
     pl.count = 0;
 }
 
+
 adrPlaylistHead createPlaylistHeadNode(string namaPlaylist) {
-    adrPlaylistHead pHead = new PlaylistHead;
+    adrPlaylistHead pHead = new PlaylistHeadNode;
+
+    pHead->playlistData.namaPlaylist = namaPlaylist;
+    pHead->playlistData.firstSong = nullptr;
+    pHead->playlistData.count = 0;
     pHead->nama = namaPlaylist;
-    pHead->nextPlaylist = NULL;
-    initPlaylist(pHead->playlistData); 
+    pHead->nextPlaylist = nullptr;
+
     return pHead;
 }
 
 adrPlaylistNode createPlaylistNode(adrLagu songPtr) {
     adrPlaylistNode pNode = new PlaylistNode;
-    pNode->songPointer = songPtr; 
-    pNode->nextSong = NULL;
+    pNode->lagu = songPtr;
+    pNode->next = nullptr;
     return pNode;
 }
 
 void insertNewPlaylist(adrPlaylistHead &head, string namaPlaylist) {
+    if (findPlaylist(head, namaPlaylist) != nullptr) {
+        cout << "Gagal: Playlist dengan nama '" << namaPlaylist << "' sudah ada." << endl;
+        return;
+    }
+
     adrPlaylistHead newHead = createPlaylistHeadNode(namaPlaylist);
-    
     newHead->nextPlaylist = head;
     head = newHead;
 
@@ -49,7 +59,7 @@ void viewAllUserPlaylists(adrPlaylistHead head) {
     cout << "\n===== LIST PLAYLIST ANDA =====" << endl;
     int count = 1;
     while (current != NULL) {
-        cout << count++ << ". " << current->nama 
+        cout << count++ << ". " << current->nama
              << " (" << current->playlistData.count << " Lagu)" << endl;
         current = current->nextPlaylist;
     }
@@ -57,11 +67,11 @@ void viewAllUserPlaylists(adrPlaylistHead head) {
 
 void addSongToPlaylist(Playlist &pl, adrLagu songPtr) {
     adrPlaylistNode pNode = createPlaylistNode(songPtr);
-    
-    pNode->nextSong = pl.firstSong;
+
+    pNode->next = pl.firstSong;
     pl.firstSong = pNode;
     pl.count++;
-    
+
     cout << "Lagu '" << songPtr->judul << "' berhasil ditambahkan ke Playlist." << endl;
 }
 
@@ -75,23 +85,23 @@ bool deleteSongFromPlaylist(Playlist &pl, string namaLagu) {
     adrPlaylistNode prev = NULL;
 
     while (current != NULL) {
-        if (current->songPointer->judul == namaLagu) {
-            
+        if (current->lagu->judul == namaLagu) {
+
             if (prev == NULL) {
-                pl.firstSong = current->nextSong;
+                pl.firstSong = current->next;
             } else {
-                prev->nextSong = current->nextSong;
+                prev->next = current->next;
             }
-            
-            delete current; 
+
+            delete current;
             pl.count--;
-            
+
             cout << "Lagu '" << namaLagu << "' berhasil dihapus dari Playlist." << endl;
-            return true; 
+            return true;
         }
 
         prev = current;
-        current = current->nextSong;
+        current = current->next;
     }
 
     cout << "Gagal menghapus: Lagu '" << namaLagu << "' tidak ditemukan di Playlist ini." << endl;
@@ -108,36 +118,36 @@ void viewPlaylistSongs(Playlist pl) {
     cout << "ID\t| Judul\t\t| Artis\t\t| Genre" << endl;
     cout << "---------------------------------------------------" << endl;
     while (current != NULL) {
-        cout << current->songPointer->idLagu << "\t| " << current->songPointer->judul
-             << "\t\t| " << current->songPointer->artis->nama
-             << "\t\t| " << current->songPointer->genre << endl;
-        current = current->nextSong;
+        cout << current->lagu->idLagu << "\t| " << current->lagu->judul
+             << "\t\t| " << current->lagu->artis->nama
+             << "\t\t| " << current->lagu->genre << endl;
+        current = current->next;
     }
 }
 
 void deleteSongReferenceFromPlaylist(Playlist &pl, adrLagu deletedSongPtr) {
     adrPlaylistNode current = pl.firstSong;
     adrPlaylistNode prev = NULL;
-    
-    while (current != NULL) {        
-        if (current->songPointer == deletedSongPtr) {
-                       
+
+    while (current != NULL) {
+        if (current->lagu == deletedSongPtr) {
+
             if (prev == NULL) {
-                pl.firstSong = current->nextSong;
+                pl.firstSong = current->next;
                 adrPlaylistNode temp = current;
                 current = pl.firstSong;
-                delete temp; 
+                delete temp;
             } else {
-                prev->nextSong = current->nextSong;
+                prev->next = current->next;
                 adrPlaylistNode temp = current;
-                current = prev->nextSong;
-                delete temp; 
+                current = prev->next;
+                delete temp;
             }
             pl.count--;
-            
+
         } else {
             prev = current;
-            current = current->nextSong;
+            current = current->next;
         }
     }
 }
@@ -146,18 +156,18 @@ void deleteSongReferenceFromAllPlaylists(Sistem &sys, adrLagu deletedSongPtr) {
     if (sys.firstUser == NULL) return;
 
     cout << "\n[START] Membersihkan referensi lagu di semua Playlist User..." << endl;
-    
+
     adrUser pUser = sys.firstUser;
     while (pUser != NULL) {
-        
+
         adrPlaylistHead pHead = pUser->userData.firstPlaylist;
         while (pHead != NULL) {
-                        
+
             deleteSongReferenceFromPlaylist(pHead->playlistData, deletedSongPtr);
-            
+
             pHead = pHead->nextPlaylist;
         }
-        
+
         pUser = pUser->nextUser;
     }
     cout << "[END] Pembersihan referensi selesai." << endl;

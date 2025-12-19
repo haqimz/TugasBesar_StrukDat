@@ -11,8 +11,8 @@ void initSistem (Sistem &sys);
 adrUser createNewUser(string uname, string pass);
 void registerAdmin(Sistem &sys, string uname, string pass);
 adrUser findUser(Sistem sys, string uname);
-void menuLogin(Sistem &sys, Library lib, Player &player);
-void menuAdmin(Library &lib);
+void menuLogin(Sistem &sys, Library &lib, Player &player);
+void menuAdmin(Library &lib, Sistem &sys);
 void menuUser(adrUser currentUserNode, Library &lib, Player &player);
 
 #endif // USER_H_INCLUDED

@@ -5,7 +5,7 @@
 
 void initPlaylist(Playlist &pl);
 adrPlaylistHead createPlaylistHeadNode(string namaPlaylist);
-adrPlaylistNode createPlaylistNode(adrLagu songPtr)
+adrPlaylistNode createPlaylistNode(adrLagu songPtr);
 
 void insertNewPlaylist(adrPlaylistHead &head, string namaPlaylist);
 adrPlaylistHead findPlaylist(adrPlaylistHead head, string namaPlaylist);
@@ -16,7 +16,6 @@ bool deleteSongFromPlaylist(Playlist &pl, string namaLagu);
 
 void viewPlaylistSongs(Playlist pl);
 
-void deleteSongReferenceFromAllPlaylists(Sistem &sys, adrLagu deletedSongPtr);
 void deleteSongReferenceFromAllPlaylists(Sistem &sys, adrLagu deletedSongPtr);
 
 #endif // PLAYLIST_H_INCLUDED
