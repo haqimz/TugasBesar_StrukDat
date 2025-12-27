@@ -63,7 +63,7 @@ void insertLagu(Library &lib, adrLagu pLagu, string namaArtis) {
 // --------------------
 
 void viewAllSongs(Library lib){
-    if (lib.firstArtis = nullptr) {
+    if (lib.firstArtis == nullptr) {
         cout << "Library kosong." << endl;
         return;
     }
@@ -253,3 +253,4 @@ adrLagu findSimilarSong(Library lib, adrLagu currentSong) {
     }
     return NULL;
 }
+
