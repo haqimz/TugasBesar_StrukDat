@@ -87,15 +87,38 @@ void menuAdmin(Library &lib, Sistem &sys) {
             case 1: {
                 int id, durasi, tahun;
                 string judul, genre, namaArtis;
-                cout << "Nama Artis: "; cin >> namaArtis;
-                cout << "ID Lagu: "; cin >> id;
-                cout << "Judul: "; cin >> judul;
-                cout << "Genre: "; cin >> genre;
-                cout << "Durasi: "; cin >> durasi;
-                cout << "Tahun: "; cin >> tahun;
 
+                // 1. Input Nama Artis (Pakai ws karena sebelumnya pasti ada input angka menu)
+                cout << "Nama Artis: ";
+                cin >> ws;               // Bersihkan buffer enter dari menu
+                getline(cin, namaArtis); // Ambil satu baris full
+
+                // 2. Input ID (Angka biasa, pakai cin)
+                cout << "ID Lagu: ";
+                cin >> id;
+
+                // 3. Input Judul (Pakai ws lagi karena sebelumnya input angka ID)
+                cout << "Judul: ";
+                cin >> ws;               // Bersihkan buffer enter dari ID
+                getline(cin, judul);     // Ambil satu baris full
+
+                // 4. Input Genre (Langsung getline aman, atau pakai ws biar konsisten)
+                cout << "Genre: ";
+                // cin >> ws; // (Opsional di sini, tapi aman kalau judul tidak pakai spasi aneh)
+                getline(cin, genre);
+
+                // 5. Input Angka sisanya (cin biasa)
+                cout << "Durasi (detik): ";
+                cin >> durasi;
+
+                cout << "Tahun: ";
+                cin >> tahun;
+
+                // Proses Insert
                 adrLagu newLagu = createLagu(id, judul, genre, durasi, tahun);
                 insertLagu(lib, newLagu, namaArtis);
+
+                cout << "Data berhasil disimpan!" << endl;
                 break;
             }
             case 2: {
@@ -193,7 +216,7 @@ void menuUser(adrUser currentUserNode, Library &lib, Player &player) {
                 break;
             }
             case 3: {
-                cout << "1. Buat Playlist Baru\n2. Lihat Semua Playlist\nPilih: ";
+                cout << "1. Buat Playlist Baru\n2. Lihat Semua Playlist\n3. Hapus Dari Playlist\nPilih: ";
                 int sub; cin >> sub;
                 if (sub == 1) {
                     cout << "Masukkan Nama Playlist: ";
@@ -203,6 +226,21 @@ void menuUser(adrUser currentUserNode, Library &lib, Player &player) {
                     insertNewPlaylist(currentUserNode->userData.firstPlaylist, nama);
                 } else if (sub == 2) {
                     viewAllUserPlaylists(currentUserNode->userData.firstPlaylist);
+                } else if (sub == 3) {
+                    cout << "Masukkan Nama Playlist: ";
+                    cin >> ws;
+                    getline(cin, namaPl);
+
+                    adrPlaylistHead ph = findPlaylist(currentUserNode->userData.firstPlaylist, namaPl);
+
+                    if (ph != nullptr) {
+                        cout << "Masukkan Judul Lagu yang ingin dihapus: ";
+                        getline(cin, judul);
+
+                        deleteSongFromPlaylist(ph->playlistData, judul);
+                    } else {
+                        cout << "Playlist '" << namaPl << "' tidak ditemukan." << endl;
+                    }
                 }
                 break;
             }
